@@ -1,6 +1,6 @@
-# k临近算法
-# 使用欧式距离计算公式计算向量点距离
 """
+k临近算法
+使用欧式距离计算公式计算向量点距离
 对未知类别属性的数据集中的每个点依次执行以下操作:
 1.计算已知类别数据集中每个点与当前点的距离
 2.按照距离递增一次排序
@@ -9,6 +9,7 @@
 5.返回前k个点出现频率最高的类别作为当前点的预测分类
 """
 from operator import itemgetter
+from os import listdir
 
 from numpy import *
 
@@ -96,5 +97,45 @@ def classfiy_person():
     norm_mat_set, ranges, min_vals = auto_norm(dating_data_mat)
     in_arr = array([ff_miles, percent_tats, ice_cream])
     classify_result = classify0(in_arr, norm_mat_set, dating_labels, 3)
-    print("预测结果:"+str(result_list[classify_result]))
-classfiy_person()
+    print("预测结果:" + str(result_list[classify_result]))
+
+
+def img_to_ventor(filename):
+    return_vect = zeros((1, 1024))
+    fr = open(filename)
+    for i in range(32):  # 行
+        line_str = fr.readline()
+        for j in range(32):
+            return_vect[0, 32 * i + j] = int(line_str[j])
+    return return_vect
+
+
+def handwriting_class_test():
+    hw_labels = []
+    training_dir = 'training_digits'
+    test_dir = 'test_digits'
+    k = 3
+    training_file_list = listdir(training_dir)
+    n_training = len(training_file_list)
+    training_mat = zeros((n_training, 1024))
+    for i in range(n_training):
+        file_name_str = training_file_list[i]
+        class_num_str = (file_name_str.split('.')[0]).split('_')[0]
+        hw_labels.append(class_num_str)
+        training_mat[i, :] = img_to_ventor(training_dir + '/' + file_name_str)
+    test_file_list = listdir(test_dir)
+    n_test = len(test_file_list)
+    error_count = 0.0
+    for i in range(n_test):
+        file_name_str = test_file_list[i]
+        class_num_str = (file_name_str.split('.')[0]).split('_')[0]
+        ventor_under_test = img_to_ventor(test_dir + '/' + file_name_str)
+        classifier_result = classify0(ventor_under_test, training_mat, hw_labels, k)
+        # print('分类器返回结果是:%s,正确结果是:%s'% (classifier_result, class_num_str))
+        if (classifier_result != class_num_str):
+            error_count += 1.0
+    print("分类器错误数目:%d, 错误率:%f"%(error_count, error_count/float(n_test)))
+
+# classfiy_person()
+handwriting_class_test()
+print()
